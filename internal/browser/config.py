@@ -8,4 +8,4 @@ layer = 'Selenium'
 browsername = 'Chrome'
 executable_path = ''
 no_sandbox = False
-headless = False
+headless = True

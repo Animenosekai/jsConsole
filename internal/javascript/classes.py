@@ -730,207 +730,6 @@ class _Navigator():
         """
         return evaluate('navigator.javaEnabled()')
 
-def setTimeout(function, milliseconds):
-    """
-    According to w3schools\n
-    Executes a function, after waiting a specified number of milliseconds.
-
-    > Returns an identifier for the timeout process (called timeoutID in the arguments of clearTimeout())
-    """
-    return evaluate(f'setTimeout("{str(function)}", {str(milliseconds)})')
-
-def setInterval(function, milliseconds):
-    """
-    According to w3schools\n
-    Same as setTimeout(), but repeats the execution of the function continuously.
-
-    > Returns an identifier for the interval process (called intervalID in the arguments of clearInterval())
-    """
-    return evaluate(f'setInterval({str(function)}, {str(milliseconds)})')
-
-def clearTimeout(timeoutID):
-    """
-    According to w3schools\n
-    The clearTimeout() method stops the execution of the function specified in setTimeout().
-    """
-    evaluate(f'clearTimeout({str(timeoutID)})', return_value=False)
-
-def clearInterval(intervalID):
-    """
-    According to w3schools\n
-    The clearInterval() method stops the executions of the function specified in the setInterval() method.
-    """
-    evaluate(f'clearInterval({str(intervalID)})', return_value=False)
-
-class _Window():
-    """
-    According to MDN\n
-
-    The Window interface represents a window containing a DOM document; the document property points to the DOM document loaded in that window.\n
-    A window for a given document can be obtained using the document.defaultView property.\n
-
-    A global variable, window, representing the window in which the script is running, is exposed to JavaScript code.\n
-
-    The Window interface is home to a variety of functions, namespaces, objects, and constructors which are not necessarily directly associated with the concept of a user interface window.\n
-    However, the Window interface is a suitable place to include these items that need to be globally available.\n
-    Many of these are documented in the JavaScript Reference and the DOM Reference.\n
-
-    In a tabbed browser, each tab is represented by its own Window object; the global window seen by JavaScript code running within a given tab always represents the tab in which the code is running.\n
-    That said, even in a tabbed browser, some properties and methods still apply to the overall window that contains the tab, such as resizeTo() and innerHeight.\n
-    Generally, anything that can't reasonably pertain to a tab pertains to the window instead.
-    """
-
-    class _Location():
-        """
-        According to MDN\n
-        The Window.location read-only property returns a Location object with information about the current location of the document.\n
-
-        Though Window.location is a read-only Location object, you can also assign a DOMString to it.\n
-        This means that you can work with location as if it were a string in most cases: location = 'http://www.example.com' is a synonym of location.href = 'http://www.example.com'.
-        """
-        href = evaluate('window.location.href')
-        hostname = evaluate('window.location.hostname')
-        pathname = evaluate('window.location.pathname')
-        protocol = evaluate('window.location.protocol')
-        port = evaluate('window.location.port')
-
-        def assign(self, URL):
-            """
-            According to MDN\n
-            Loads the resource at the URL provided in parameter.
-            """
-            return evaluate(f'window.location.assign("{str(URL)}"")', return_value=False)
-
-        def reload(self):
-            """
-            According to MDN\n
-            Reloads the current URL, like the Refresh button.
-            """
-            return evaluate(f'window.location.reload()', return_value=False)
-
-        def replace(self, URL):
-            """
-            According to MDN\n
-            Replaces the current resource with the one at the provided URL (redirects to the provided URL).\n
-            The difference from the assign() method and setting the href property is that after using replace() the current page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
-            """
-            return evaluate(f'window.location.replace("{str(URL)}"")', return_value=False)
-
-        def toString(self):
-            """
-            According to MDN\n
-            Returns a USVString containing the whole URL.\n
-            It is a synonym for HTMLHyperlinkElementUtils.href, though it can't be used to modify the value.
-            """
-            return evaluate(f'window.location.toString()')
-
-    innerHeight = evaluate('window.innerHeight')
-    innerWidth = evaluate('window.innerWidth')
-    location = _Location()
-    screen = _Screen()
-    history = _History()
-    navigator = _Navigator()
-    console = _Console()
-
-    def close(self):
-        """
-        According to MDN\n
-        Closes the current window.
-        """
-        evaluate('window.close()', return_value=False)
-
-    def kill(self):
-        """
-        pyJsConsole specific command.\n
-        Kills the browser process.
-        """
-        browser.kill()
-
-    def open(self, URL, windowName='', windowFeatures=''):
-        """
-        According to MDN\n
-        The Window interface's open() method loads the specified resource into the new or existing browsing context (window, <iframe> or tab) with the specified name.\n
-        If the name doesn't exist, then a new browsing context is opened in a new tab or a new window, and the specified resource is loaded into it.
-        """
-        return evaluate(f'window.open("{str(URL)}", "{str(windowName)}", "{str(windowFeatures)}")', return_value=False)
-    
-    def moveTo(self, x, y):
-        """
-        According to MDN\n
-        Moves the window to the specified coordinates.
-        """
-        return evaluate(f'window.moveTo("{str(x)}", "{str(y)}")', return_value=False)
-    
-    def resizeTo(self, width, height):
-        """
-        According to MDN\n
-        Dynamically resizes window.
-        """
-        return evaluate(f'window.resizeTo("{str(width)}", "{str(height)}")', return_value=False)
-
-    def alert(self, text):
-        """
-        According to MDN\n
-        Displays an alert dialog.
-        """
-        try:
-            evaluate(f'window.alert("{str(text)}")', return_value=False)
-        except:
-            pass
-
-    def confirm(self, text):
-        """
-        According to MDN\n
-        Displays a dialog with a message that the user needs to respond to.
-        """
-        try:
-            evaluate(f'a = window.confirm("{str(text)}")', return_value=False)
-            return evaluate('a')
-        except:
-            return False
-
-    def prompt(self, text):
-        """
-        According to MDN\n
-        Returns the text entered by the user in a prompt dialog.
-        """
-        try:
-            evaluate(f'a = window.prompt("{str(text)}")', return_value=False)
-            return evaluate('a')
-        except:
-            return False
-
-    def setTimeout(self, function, milliseconds):
-        """
-        According to w3schools\n
-        Executes a function, after waiting a specified number of milliseconds.
-
-        > Returns an identifier for the timeout process (called timeoutID in the arguments of clearTimeout())
-        """
-        return evaluate(f'setTimeout("{str(function)}", {str(milliseconds)})')
-
-    def setInterval(self, function, milliseconds):
-        """
-        According to w3schools\n
-        Same as setTimeout(), but repeats the execution of the function continuously.
-
-        > Returns an identifier for the interval process (called intervalID in the arguments of clearInterval())
-        """
-        return evaluate(f'setInterval("{str(function)}", {str(milliseconds)})')
-
-    def clearTimeout(self, timeoutID):
-        """
-        According to w3schools\n
-        The clearTimeout() method stops the execution of the function specified in setTimeout().
-        """
-        evaluate(f'clearTimeout({str(timeoutID)})', return_value=False)
-
-    def clearInterval(self, intervalID):
-        """
-        According to w3schools\n
-        The clearInterval() method stops the executions of the function specified in the setInterval() method.
-        """
-        evaluate(f'clearInterval({str(intervalID)})', return_value=False)
 
 class _Attribute():
     def __init__(self):
@@ -1015,118 +814,123 @@ class _DOMElement():
     @calling_method.setter
     def calling_method(self, value):
         self._calling_method = value
-        self._id = evaluate(value + '.id')
-        self._innerHTML = evaluate(value + '.innerHTML')
-        self._innerText = evaluate(value + '.innerText')
-        self._style = evaluate(value + '.style')
-        self._textContent = evaluate(value + '.textContent')
-        self._title = evaluate(value + '.title')
+        try:
+            self._id = evaluate(value + '.id')
+            self._innerHTML = evaluate(value + '.innerHTML')
+            self._innerText = evaluate(value + '.innerText')
+            self._style = evaluate(value + '.style')
+            self._textContent = evaluate(value + '.textContent')
+            self._title = evaluate(value + '.title')
 
-        self._accessKey = evaluate(value + '.accessKey')
-        self._childElementCount = evaluate(value + '.childElementCount')
-        self._className = evaluate(value + '.className')
-        self._clientHeight = evaluate(value + '.clientHeight')
-        self._clientLeft = evaluate(value + '.clientLeft')
-        self._clientTop = evaluate(value + '.clientTop')
-        self._clientWidth = evaluate(value + '.clientWidth')
-        self._contentEditable = evaluate(value + '.contentEditable')
-        self._dir = evaluate(value + '.dir')
-        self._isContentEditable = evaluate(value + '.isContentEditable')
-        self._lang = evaluate(value + '.lang')
-        self._nodeName = evaluate(value + '.nodeName')
-        self._nodeType = evaluate(value + '.nodeType')
-        self._nodeValue = evaluate(value + '.nodeValue')
-        self._offsetHeight = evaluate(value + '.offsetHeight')
-        self._offsetWidth = evaluate(value + '.offsetWidth')
-        self._offsetLeft = evaluate(value + '.offsetLeft')
-        self._offsetParent = evaluate(value + '.offsetParent')
-        self._offsetTop = evaluate(value + '.offsetTop')
-        self._outerHTML = evaluate(value + '.outerHTML')
-        self._outerText = evaluate(value + '.outerText')
-        self._scrollHeight = evaluate(value + '.scrollHeight')
-        self._scrollLeft = evaluate(value + '.scrollLeft')
-        self._scrollTop = evaluate(value + '.scrollTop')
-        self._scrollWidth = evaluate(value + '.scrollWidth')
-        self._tabIndex = evaluate(value + '.tabIndex')
-        self._tagName = evaluate(value + '.tagName')
+            self._accessKey = evaluate(value + '.accessKey')
+            self._childElementCount = evaluate(value + '.childElementCount')
+            self._className = evaluate(value + '.className')
+            self._clientHeight = evaluate(value + '.clientHeight')
+            self._clientLeft = evaluate(value + '.clientLeft')
+            self._clientTop = evaluate(value + '.clientTop')
+            self._clientWidth = evaluate(value + '.clientWidth')
+            self._contentEditable = evaluate(value + '.contentEditable')
+            self._dir = evaluate(value + '.dir')
+            self._isContentEditable = evaluate(value + '.isContentEditable')
+            self._lang = evaluate(value + '.lang')
+            self._nodeName = evaluate(value + '.nodeName')
+            self._nodeType = evaluate(value + '.nodeType')
+            self._nodeValue = evaluate(value + '.nodeValue')
+            self._offsetHeight = evaluate(value + '.offsetHeight')
+            self._offsetWidth = evaluate(value + '.offsetWidth')
+            self._offsetLeft = evaluate(value + '.offsetLeft')
+            self._offsetParent = evaluate(value + '.offsetParent')
+            self._offsetTop = evaluate(value + '.offsetTop')
+            self._outerHTML = evaluate(value + '.outerHTML')
+            self._outerText = evaluate(value + '.outerText')
+            self._scrollHeight = evaluate(value + '.scrollHeight')
+            self._scrollLeft = evaluate(value + '.scrollLeft')
+            self._scrollTop = evaluate(value + '.scrollTop')
+            self._scrollWidth = evaluate(value + '.scrollWidth')
+            self._tabIndex = evaluate(value + '.tabIndex')
+            self._tagName = evaluate(value + '.tagName')
 
-        length = evaluate(value + '.childNodes.length')
-        list_of_dom = []
-        for number in range(int(length)):
+            length = evaluate(value + '.childNodes.length')
+            list_of_dom = []
+            for number in range(int(length)):
+                newDOMElement = _DOMElement()
+                newDOMElement._calling_method = value + f'.childNodes[{str(number)}]'
+                list_of_dom.append(newDOMElement)
+            self._childNodes = list_of_dom
+
+            length = evaluate(value + '.children.length')
+            list_of_dom = []
+            for number in range(int(length)):
+                newDOMElement = _DOMElement()
+                newDOMElement._calling_method = value + f'.children[{str(number)}]'
+                list_of_dom.append(newDOMElement)
+            self._children = list_of_dom
+
             newDOMElement = _DOMElement()
-            newDOMElement._calling_method = value + f'.childNodes[{str(number)}]'
-            list_of_dom.append(newDOMElement)
-        self._childNodes = list_of_dom
+            newDOMElement._calling_method = value + '.firstChild'
+            self._firstChild = newDOMElement
 
-        length = evaluate(value + '.children.length')
-        list_of_dom = []
-        for number in range(int(length)):
             newDOMElement = _DOMElement()
-            newDOMElement._calling_method = value + f'.children[{str(number)}]'
-            list_of_dom.append(newDOMElement)
-        self._children = list_of_dom
+            newDOMElement._calling_method = value + '.firstElementChild'
+            self._firstElementChild = newDOMElement
 
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.firstChild'
-        self._firstChild = newDOMElement
+            newDOMElement = _DOMElement()
+            newDOMElement._calling_method = value + '.lastChild'
+            self._lastChild = newDOMElement
 
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.firstElementChild'
-        self._firstElementChild = newDOMElement
+            newDOMElement = _DOMElement()
+            newDOMElement._calling_method = value + '.lastElementChild'
+            self._lastElementChild = newDOMElement
 
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.lastChild'
-        self._lastChild = newDOMElement
+            newDOMElement = _DOMElement()
+            newDOMElement._calling_method = value + '.nextSibling'
+            self._nextSibling = newDOMElement
 
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.lastElementChild'
-        self._lastElementChild = newDOMElement
+            newDOMElement = _DOMElement()
+            newDOMElement._calling_method = value + '.nextElementSibling'
+            self._nextElementSibling = newDOMElement
 
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.nextSibling'
-        self._nextSibling = newDOMElement
+            newDOMElement = _DOMElement()
+            newDOMElement._calling_method = value + '.parentNode'
+            self._parentNode = newDOMElement
 
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.nextElementSibling'
-        self._nextElementSibling = newDOMElement
+            newDOMElement = _DOMElement()
+            newDOMElement._calling_method = value + '.parentElement'
+            self._parentElement = newDOMElement
 
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.parentNode'
-        self._parentNode = newDOMElement
+            newDOMElement = _DOMElement()
+            newDOMElement._calling_method = value + '.previousSibling'
+            self._previousSibling = newDOMElement
 
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.parentElement'
-        self._parentElement = newDOMElement
-
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.previousSibling'
-        self._previousSibling = newDOMElement
-
-        newDOMElement = _DOMElement()
-        newDOMElement._calling_method = value + '.previousElementSibling'
-        self._previousElementSibling = newDOMElement
+            newDOMElement = _DOMElement()
+            newDOMElement._calling_method = value + '.previousElementSibling'
+            self._previousElementSibling = newDOMElement
 
 
-        class _ClassList(object):
-            def __init__(self, domobject):
-                self.domobject = domobject
-            
-            def add(self, className):
-                evaluate(self.domobject._calling_method + f'.classList.add("{str(className)}")', return_value=False)
-
-            def remove(self, className):
-                evaluate(self.domobject._calling_method + f'.classList.remove("{str(className)}")', return_value=False)
-            
-            def toggle(self, className):
-                evaluate(self.domobject._calling_method + f'.classList.toggle("{str(className)}")', return_value=False)
-
-            def contains(self, className):
-                return evaluate(self.domobject._calling_method + f'.classList.contains("{str(className)}")')
+            class _ClassList(object):
+                def __init__(self, domobject):
+                    self.domobject = domobject
                 
-            def item(self, index):
-                return evaluate(self.domobject._calling_method + f'.classList.index("{str(index)}")')
+                def add(self, className):
+                    evaluate(self.domobject._calling_method + f'.classList.add("{str(className)}")', return_value=False)
 
-        self.classList = _ClassList(self)
+                def remove(self, className):
+                    evaluate(self.domobject._calling_method + f'.classList.remove("{str(className)}")', return_value=False)
+                
+                def toggle(self, className):
+                    evaluate(self.domobject._calling_method + f'.classList.toggle("{str(className)}")', return_value=False)
+
+                def contains(self, className):
+                    return evaluate(self.domobject._calling_method + f'.classList.contains("{str(className)}")')
+                    
+                def item(self, index):
+                    return evaluate(self.domobject._calling_method + f'.classList.index("{str(index)}")')
+
+            self.classList = _ClassList(self)
+
+        except:
+            pass
+
 
 
     @property
@@ -1647,54 +1451,186 @@ class _Document():
 ########## METHODS/FUNCTIONS
     def __init__(self):
         ###
+
+        class _Plugin():
+            """
+            According to MDN\n
+            The Plugin interface provides information about a browser plugin.
+            """
+            def __init__(self, path):
+                class _MimeType():
+                    """
+                    According to MDN\n
+                    The MimeType interface provides contains information about a MIME type associated with a particular plugin.\n
+                    NavigatorPlugins.mimeTypes returns an array of this object.
+                    """
+                    def __init__(self, path):
+                        self.description = evaluate(path + '.description')
+                        self.suffixes = evaluate(path + '.suffixes')
+                        self.type = evaluate(path + '.type')
+
+                self.description = evaluate(path + '.description')
+                self.filename = evaluate(path + '.filename')
+                self.length = evaluate(path + '.length')
+                self.name = evaluate(path + '.name')
+                list_of_element = []
+                for number in range(int(self.length)):
+                    newMimeElement = _MimeType(path + f'[{str(number)}]')
+                    list_of_element.append(newMimeElement)
+                self.MimeType = list_of_element
+
+    
+
+        class _Location():
+            """
+            According to MDN\n
+            The Document.location read-only property returns a Location object, which contains information about the URL of the document and provides methods for changing that URL and loading another URL.\n
+
+            Though Document.location is a read-only Location object.\n
+            
+            To retrieve just the URL as a string, the read-only document.URL property can also be used.\n
+
+            If the current document is not in a browsing context, the returned value is null.\n
+            """
+            href = evaluate('document.location.href')
+            hostname = evaluate('document.location.hostname')
+            pathname = evaluate('document.location.pathname')
+            protocol = evaluate('document.location.protocol')
+            port = evaluate('document.location.port')
+
+            def assign(self, URL):
+                """
+                According to MDN\n
+                Loads the resource at the URL provided in parameter.
+                """
+                return evaluate(f'document.location.assign("{str(URL)}"")', return_value=False)
+
+            def reload(self):
+                """
+                According to MDN\n
+                Reloads the current URL, like the Refresh button.
+                """
+                return evaluate(f'document.location.reload()', return_value=False)
+
+            def replace(self, URL):
+                """
+                According to MDN\n
+                Replaces the current resource with the one at the provided URL (redirects to the provided URL).\n
+                The difference from the assign() method and setting the href property is that after using replace() the current page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
+                """
+                return evaluate(f'document.location.replace("{str(URL)}"")', return_value=False)
+
+            def toString(self):
+                """
+                According to MDN\n
+                Returns a USVString containing the whole URL.\n
+                It is a synonym for HTMLHyperlinkElementUtils.href, though it can't be used to modify the value.
+                """
+                return evaluate(f'document.location.toString()')
+
+
+
         self._anchors = evaluate('document.anchors')
-        self._body = evaluate('document.body')
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = 'document.body'
+        self._body = newDOMElement
         self._characterSet = evaluate('document.characterSet')
         self._compatMode = evaluate('document.compatMode')
         self._contentType = evaluate('document.contentType')
         self._doctype = evaluate('document.doctype')
-        self._documentElement = evaluate('document.documentElement')
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = 'document.documentElement'
+        self._documentElement = newDOMElement
         self._documentURI = evaluate('document.documentURI')
-        self._embeds = evaluate('document.embeds')
+        list_of_elements = []
+        for number in range(int(evaluate('document.embeds.length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.embeds[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        self._embeds = list_of_elements
         self._fonts = evaluate('document.fonts')
-        self._forms = evaluate('document.forms')
-        self._head = evaluate('document.head')
+        list_of_elements = []
+        for number in range(int(evaluate('document.forms.length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.forms[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        self._forms = list_of_elements
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = 'document.head'
+        self._head = newDOMElement
         self._hidden = evaluate('document.hidden')
-        self._images = evaluate('document.images')
+        list_of_elements = []
+        for number in range(int(evaluate('document.images.length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.images[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        self._images = list_of_elements
         self._implementation = evaluate('document.implementation')
         self._lastStyleSheetSet = evaluate('document.lastStyleSheetSet')
-        self._links = evaluate('document.links')
-        self._plugins = evaluate('document.plugins')
+        list_of_elements = []
+        for number in range(int(evaluate('document.links.length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.links[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        self._links = list_of_elements
+        list_of_elements = []
+        for number in range(int(evaluate('document.plugins.length'))):
+            newPluginElement = _Plugin(f'document.plugins[{str(number)}]')
+            list_of_elements.append(newPluginElement)
+        self._plugins = list_of_elements
         self._featurePolicy = evaluate('document.featurePolicy')
         self._preferredStyleSheetSet = evaluate('document.preferredStyleSheetSet')
-        self._scripts = evaluate('document.scripts')
-        self._scrollingElement = evaluate('document.scrollingElement')
+        list_of_elements = []
+        for number in range(int(evaluate('document.scripts.length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.scripts[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        self._scripts = list_of_elements
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = 'document.scrollingElement'
+        self._scrollingElement = newDOMElement
         self._selectedStyleSeetSet = evaluate('document.selectedStyleSeetSet')
         self._styleSheetSets = evaluate('document.styleSheetSets')
         self._timeline = evaluate('document.timeline')
         self._undoManager = evaluate('document.undoManager')
         self._visibilityState = evaluate('document.visibilityState')
         self._childElementCount = evaluate('document.childElementCount')
-        self._children = evaluate('document.children')
-        self._firstElementChild = evaluate('document.firstElementChild')
-        self._lastElementChild = evaluate('document.lastElementChild')
+        list_of_elements = []
+        for number in range(int(evaluate('document.children.length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.children[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        self._children = list_of_elements
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = 'document.firstElementChild'
+        self._firstElementChild = newDOMElement
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = 'document.lastElementChild'
+        self._lastElementChild = newDOMElement
         try:
             self._cookie = evaluate('document.cookie')
         except:
             self._cookie = None
-        self._defaultView = _Window()
+
+        self._defaultView = 'Needs to be a _Window() object but cannot be because of recursion issues.\n You can get the value for document.defaultView with window.'
         self._designMode = evaluate('document.designMode')
         self._dir = evaluate('document.dir')
         self._domain = evaluate('document.domain')
         self._lastModified = evaluate('document.lastModified')
-        self._location = evaluate('document.location')
+        self._location = _Location()
         self._readyState = evaluate('document.readyState')
         self._referrer = evaluate('document.referrer')
         self._title = evaluate('document.title')
         self._URL = evaluate('document.URL')
-        self._activeElement = evaluate('document.activeElement')
-        self._fullscreenElement = evaluate('document.fullscreenElement')
-        self._pointerLockElement = evaluate('document.pointerLockElement')
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = 'document.activeElement'
+        self._activeElement = newDOMElement
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = 'document.fullscreenElement'
+        self._fullscreenElement = newDOMElement
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = 'document.pointerLockElement'
+        self._pointerLockElement = newDOMElement
         self._styleSheets = evaluate('document.styleSheets')
 
 
@@ -1756,6 +1692,15 @@ class _Document():
         return newDOMElement
 
 
+######### LESS COMMON METHODS
+    def adoptNode(self):
+        """
+        According to MDN\n
+        Document.adoptNode() transfers a node from another document into the method's document.\n
+        The adopted node and its subtree is removed from its original document (if any), and its ownerDocument is changed to the current document.\n
+        The node can then be inserted into the current document.
+        """
+        evaluate()
 
 
 ########### PROPERTIES
@@ -1989,7 +1934,8 @@ class _Document():
         return self._location
     @location.setter
     def location(self, value):
-        raise ReadOnlyError('<document.location> is a read-only property.')
+        self._location.href = value
+        evaluate(f'document.location.href = {value}', return_value=False)
 
     @property
     def readyState(self):
@@ -2098,3 +2044,211 @@ class _Document():
     def title(self, value):
         self._title = value
         evaluate(f'document.title = "{value}"', return_value=False)
+
+
+def setTimeout(function, milliseconds):
+    """
+    According to w3schools\n
+    Executes a function, after waiting a specified number of milliseconds.
+
+    > Returns an identifier for the timeout process (called timeoutID in the arguments of clearTimeout())
+    """
+    return evaluate(f'setTimeout("{str(function)}", {str(milliseconds)})')
+
+def setInterval(function, milliseconds):
+    """
+    According to w3schools\n
+    Same as setTimeout(), but repeats the execution of the function continuously.
+
+    > Returns an identifier for the interval process (called intervalID in the arguments of clearInterval())
+    """
+    return evaluate(f'setInterval({str(function)}, {str(milliseconds)})')
+
+def clearTimeout(timeoutID):
+    """
+    According to w3schools\n
+    The clearTimeout() method stops the execution of the function specified in setTimeout().
+    """
+    evaluate(f'clearTimeout({str(timeoutID)})', return_value=False)
+
+def clearInterval(intervalID):
+    """
+    According to w3schools\n
+    The clearInterval() method stops the executions of the function specified in the setInterval() method.
+    """
+    evaluate(f'clearInterval({str(intervalID)})', return_value=False)
+
+
+
+
+class _Window():
+    """
+    According to MDN\n
+
+    The Window interface represents a window containing a DOM document; the document property points to the DOM document loaded in that window.\n
+    A window for a given document can be obtained using the document.defaultView property.\n
+
+    A global variable, window, representing the window in which the script is running, is exposed to JavaScript code.\n
+
+    The Window interface is home to a variety of functions, namespaces, objects, and constructors which are not necessarily directly associated with the concept of a user interface window.\n
+    However, the Window interface is a suitable place to include these items that need to be globally available.\n
+    Many of these are documented in the JavaScript Reference and the DOM Reference.\n
+
+    In a tabbed browser, each tab is represented by its own Window object; the global window seen by JavaScript code running within a given tab always represents the tab in which the code is running.\n
+    That said, even in a tabbed browser, some properties and methods still apply to the overall window that contains the tab, such as resizeTo() and innerHeight.\n
+    Generally, anything that can't reasonably pertain to a tab pertains to the window instead.
+    """
+
+    class _Location():
+        """
+        According to MDN\n
+        The Window.location read-only property returns a Location object with information about the current location of the document.
+        """
+        href = evaluate('window.location.href')
+        hostname = evaluate('window.location.hostname')
+        pathname = evaluate('window.location.pathname')
+        protocol = evaluate('window.location.protocol')
+        port = evaluate('window.location.port')
+
+        def assign(self, URL):
+            """
+            According to MDN\n
+            Loads the resource at the URL provided in parameter.
+            """
+            return evaluate(f'window.location.assign("{str(URL)}"")', return_value=False)
+
+        def reload(self):
+            """
+            According to MDN\n
+            Reloads the current URL, like the Refresh button.
+            """
+            return evaluate(f'window.location.reload()', return_value=False)
+
+        def replace(self, URL):
+            """
+            According to MDN\n
+            Replaces the current resource with the one at the provided URL (redirects to the provided URL).\n
+            The difference from the assign() method and setting the href property is that after using replace() the current page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
+            """
+            return evaluate(f'window.location.replace("{str(URL)}"")', return_value=False)
+
+        def toString(self):
+            """
+            According to MDN\n
+            Returns a USVString containing the whole URL.\n
+            It is a synonym for HTMLHyperlinkElementUtils.href, though it can't be used to modify the value.
+            """
+            return evaluate(f'window.location.toString()')
+
+    innerHeight = evaluate('window.innerHeight')
+    innerWidth = evaluate('window.innerWidth')
+
+    Math = _Math()
+    location = _Location()
+    screen = _Screen()
+    history = _History()
+    navigator = _Navigator()
+    console = _Console()
+    document = _Document()
+    #window = _Window()
+    window = 'Needs to be a _Window() object but cannot be because of recursion issues.\n You can get the value for window.window with window.'
+
+    def close(self):
+        """
+        According to MDN\n
+        Closes the current window.
+        """
+        evaluate('window.close()', return_value=False)
+
+    def kill(self):
+        """
+        pyJsConsole specific command.\n
+        Kills the browser process.
+        """
+        browser.kill()
+
+    def open(self, URL, windowName='', windowFeatures=''):
+        """
+        According to MDN\n
+        The Window interface's open() method loads the specified resource into the new or existing browsing context (window, <iframe> or tab) with the specified name.\n
+        If the name doesn't exist, then a new browsing context is opened in a new tab or a new window, and the specified resource is loaded into it.
+        """
+        return evaluate(f'window.open("{str(URL)}", "{str(windowName)}", "{str(windowFeatures)}")', return_value=False)
+    
+    def moveTo(self, x, y):
+        """
+        According to MDN\n
+        Moves the window to the specified coordinates.
+        """
+        return evaluate(f'window.moveTo("{str(x)}", "{str(y)}")', return_value=False)
+    
+    def resizeTo(self, width, height):
+        """
+        According to MDN\n
+        Dynamically resizes window.
+        """
+        return evaluate(f'window.resizeTo("{str(width)}", "{str(height)}")', return_value=False)
+
+    def alert(self, text):
+        """
+        According to MDN\n
+        Displays an alert dialog.
+        """
+        try:
+            evaluate(f'window.alert("{str(text)}")', return_value=False)
+        except:
+            pass
+
+    def confirm(self, text):
+        """
+        According to MDN\n
+        Displays a dialog with a message that the user needs to respond to.
+        """
+        try:
+            evaluate(f'a = window.confirm("{str(text)}")', return_value=False)
+            return evaluate('a')
+        except:
+            return False
+
+    def prompt(self, text):
+        """
+        According to MDN\n
+        Returns the text entered by the user in a prompt dialog.
+        """
+        try:
+            evaluate(f'a = window.prompt("{str(text)}")', return_value=False)
+            return evaluate('a')
+        except:
+            return False
+
+    def setTimeout(self, function, milliseconds):
+        """
+        According to w3schools\n
+        Executes a function, after waiting a specified number of milliseconds.
+
+        > Returns an identifier for the timeout process (called timeoutID in the arguments of clearTimeout())
+        """
+        return evaluate(f'setTimeout("{str(function)}", {str(milliseconds)})')
+
+    def setInterval(self, function, milliseconds):
+        """
+        According to w3schools\n
+        Same as setTimeout(), but repeats the execution of the function continuously.
+
+        > Returns an identifier for the interval process (called intervalID in the arguments of clearInterval())
+        """
+        return evaluate(f'setInterval("{str(function)}", {str(milliseconds)})')
+
+    def clearTimeout(self, timeoutID):
+        """
+        According to w3schools\n
+        The clearTimeout() method stops the execution of the function specified in setTimeout().
+        """
+        evaluate(f'clearTimeout({str(timeoutID)})', return_value=False)
+
+    def clearInterval(self, intervalID):
+        """
+        According to w3schools\n
+        The clearInterval() method stops the executions of the function specified in the setInterval() method.
+        """
+        evaluate(f'clearInterval({str(intervalID)})', return_value=False)
