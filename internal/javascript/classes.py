@@ -2527,11 +2527,12 @@ class _Window():
         According to MDN\n
         The Window.location read-only property returns a Location object with information about the current location of the document.
         """
-        href = evaluate('window.location.href')
-        hostname = evaluate('window.location.hostname')
-        pathname = evaluate('window.location.pathname')
-        protocol = evaluate('window.location.protocol')
-        port = evaluate('window.location.port')
+        def __init__(self):
+            self.href = evaluate('window.location.href')
+            self.hostname = evaluate('window.location.hostname')
+            self.pathname = evaluate('window.location.pathname')
+            self.protocol = evaluate('window.location.protocol')
+            self.port = evaluate('window.location.port')
 
         def assign(self, URL):
             """
@@ -2563,18 +2564,19 @@ class _Window():
             """
             return evaluate(f'window.location.toString()')
 
-    innerHeight = evaluate('window.innerHeight')
-    innerWidth = evaluate('window.innerWidth')
+    def __init__(self):
+        self.innerHeight = evaluate('window.innerHeight')
+        self.innerWidth = evaluate('window.innerWidth')
 
-    Math = _Math()
-    location = _Location()
-    screen = _Screen()
-    history = _History()
-    navigator = _Navigator()
-    console = _Console()
-    document = _Document()
-    #window = _Window()
-    window = 'Needs to be a _Window() object but cannot be because of recursion issues.\n You can get the value for window.window with window.'
+        self.Math = _Math()
+        self.location = self._Location()
+        self.screen = _Screen()
+        self.history = _History()
+        self.navigator = _Navigator()
+        self.console = _Console()
+        self.document = _Document()
+        #self.window = _Window()
+        self.window = 'Needs to be a _Window() object but cannot be because of recursion issues.\n You can get the value for window.window with window.'
 
     def close(self):
         """
