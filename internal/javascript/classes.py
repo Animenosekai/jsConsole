@@ -5,15 +5,20 @@ All of the JavaScript classes used by pyJsConsole.
 """
 
 #from .execute_js import evaluate, switch_to_alert
-from .execute_js import evaluate
-from .. import browser
+from ..browser import informations
+#print(informations.areClassesInitialized)
+if not informations.areClassesInitialized:    
+    from .execute_js import evaluate
+    from .. import browser
 from ..exceptions import *
 
 #import lifeeasy
 
+import threading
+import time
+
 import random
 import string
-
 list_of_variables = []
 
 def createRandomString(length):
@@ -625,8 +630,14 @@ class _Navigator():
     """
 
     class _UserActivation():
-        hasBeenActive = evaluate('navigator.userActivation.hasBeenActive')
-        isActive = evaluate('navigator.userActivation.isActive')
+        try:
+            hasBeenActive = evaluate('navigator.userActivation.hasBeenActive')
+        except:
+            hasBeenActive = True
+        try:
+            isActive = evaluate('navigator.userActivation.isActive')
+        except:
+            isActive = True
 
     class _NetworkInformation():
         """
@@ -649,9 +660,14 @@ class _Navigator():
         For example, a smartphone might have a standard panel in its lock screen that provides controls for media.\n
         A browser on that device might deliver the metadata provided by calling MediaSession to the device in order to be controllable using the global user interface.
         """
-        metadata = evaluate('navigator.mediaSession.metadata')
-        playbackState = evaluate('navigator.mediaSession.playbackState')
-
+        try:
+            metadata = evaluate('navigator.mediaSession.metadata')
+        except:
+            metadata = None
+        try:
+            playbackState = evaluate('navigator.mediaSession.playbackState')
+        except:
+            playbackState = None
 
     def __init__(self):
         class _MimeType():
@@ -803,6 +819,13 @@ class _Attribute():
         evaluate(self._calling_method + f'.value = "{str(value)}"', return_value=False)
         self._value = value
 
+class _DocumentFragment():
+    def __init__(self):
+        self.children = []
+        self.firstElementChild = None
+        self.lastElementChild = None
+        self.childElementCount = None
+
 class _DOMElement():
     def __init__(self):
         self._calling_method = ''
@@ -915,10 +938,60 @@ class _DOMElement():
                     evaluate(self.domobject._calling_method + f'.classList.add("{str(className)}")', return_value=False)
 
                 def remove(self, className):
-                    evaluate(self.domobject._calling_method + f'.classList.remove("{str(className)}")', return_value=False)
-                
+                    if self.domobject._calling_method.find('getElementsByClassName') != -1:
+                        classNames = evaluate(self.domobject._calling_method + '.className').split(' ')
+                        classNames.remove(className)
+                        correct_number = -1
+                        if len(classNames) > 0:
+                            for value in classNames:
+                                for number in range(int(evaluate(f'document.getElementsByClassName("{str(value)}").length'))):
+                                    if evaluate(self.domobject._calling_method + f' === document.getElementsByClassName("{str(value)}[{str(number)}]")'):
+                                        correct_number = number
+                                        newCallingMethod = f'document.getElementsByClassName("{str(value)}[{str(number)}]")'
+                        if correct_number == -1:
+                            if evaluate(self.domobject._calling_method + '.id') != '':
+                                newCallingMethod = f'document.getElementById("{str(evaluate(self.domobject._calling_method + ".id"))}")'
+                            elif evaluate(self.domobject._calling_method + '.getAttribute("name")') != '':
+                                nameAttribute = str(evaluate(self.domobject._calling_method + ".getAttribute(\"name\")"))
+                                for number in range(int(evaluate(f'document.getElementsByName("{nameAttribute}").length'))):
+                                    if evaluate(self.domobject._calling_method + ' === ' + f'document.getElementsByName("{attributeName}")[{str(number)}]'):
+                                        newCallingMethod = f'document.getElementsByName("{attributeName}")[{str(number)}]'
+                            else:
+                                for number in range(int(evaluate(f'document.getElementsByTagName("{str(evaluate(self.domobject._calling_method + ".tagName"))}.length")'))):
+                                    if evalute(self.domobject._calling_method + f' === document.getElementsByTagName("{str(evaluate(self.domobject._calling_method + ".tagName"))}[{str(number)}]'):
+                                        newCallingMethod = f'document.getElementsByTagName("{str(evaluate(self.domobject._calling_method + ".tagName"))}[{str(number)}]'
+                        evaluate(self.domobject._calling_method + f'.classList.remove("{str(className)}")', return_value=False)
+                        self.domobject.calling_method = newCallingMethod
+                    else:
+                        evaluate(self.domobject._calling_method + f'.classList.remove("{str(className)}")', return_value=False)
+                        
                 def toggle(self, className):
-                    evaluate(self.domobject._calling_method + f'.classList.toggle("{str(className)}")', return_value=False)
+                    if self.domobject._calling_method.find('getElementsByClassName') != -1:
+                        classNames = evaluate(self.domobject._calling_method + '.className').split(' ')
+                        classNames.remove(className)
+                        correct_number = -1
+                        if len(classNames) > 0:
+                            for value in classNames:
+                                for number in range(int(evaluate(f'document.getElementsByClassName("{str(value)}").length'))):
+                                    if evaluate(self.domobject._calling_method + f' === document.getElementsByClassName("{str(value)}[{str(number)}]")'):
+                                        correct_number = number
+                                        newCallingMethod = f'document.getElementsByClassName("{str(value)}[{str(number)}]")'
+                        if correct_number == -1:
+                            if evaluate(self.domobject._calling_method + '.id') != '':
+                                newCallingMethod = f'document.getElementById("{str(evaluate(self.domobject._calling_method + ".id"))}")'
+                            elif evaluate(self.domobject._calling_method + '.getAttribute("name")') != '':
+                                attributeName = str(evaluate(self.domobject._calling_method + ".getAttribute(\"name\")"))
+                                for number in range(int(evaluate(f'document.getElementsByName("{attributeName}").length'))):
+                                    if evaluate(self.domobject._calling_method + ' === ' + f'document.getElementsByName("{attributeName}")[{str(number)}]'):
+                                        newCallingMethod = f'document.getElementsByName("{attributeName}")[{str(number)}]'
+                            else:
+                                for number in range(int(evaluate(f'document.getElementsByTagName("{str(evaluate(self.domobject._calling_method + ".tagName"))}.length")'))):
+                                    if evalute(self.domobject._calling_method + f' === document.getElementsByTagName("{str(evaluate(self.domobject._calling_method + ".tagName"))}[{str(number)}]'):
+                                        newCallingMethod = f'document.getElementsByTagName("{str(evaluate(self.domobject._calling_method + ".tagName"))}[{str(number)}]'
+                        evaluate(self.domobject._calling_method + f'.classList.toggle("{str(className)}")', return_value=False)
+                        self.domobject.calling_method = newCallingMethod
+                    else:
+                        evaluate(self.domobject._calling_method + f'.classList.toggle("{str(className)}")', return_value=False)
 
                 def contains(self, className):
                     return evaluate(self.domobject._calling_method + f'.classList.contains("{str(className)}")')
@@ -1006,8 +1079,26 @@ class _DOMElement():
         return self._className
     @className.setter
     def className(self, value):
-        evaluate(self._calling_method + f'.className = "{str(value)}"', return_value=False)
-        self._className = value
+        if self._calling_method.find('getElementsByClassName') != -1:
+            correct_number = -1
+            calling_className = ''
+            for number in range(int(evaluate(f'document.getElementsByClassName("{str(value)}").length'))):
+                if evaluate(self._calling_method + f' === document.getElementsByClassName("{str(value)}[{str(number)}]")'):
+                    correct_number = number
+                    calling_className = value
+            if correct_number == -1:
+                if len(value.split(' ')) > 1:
+                    for aValue in value.split(' '):
+                        for number in range(int(evaluate(f'document.getElementsByClassName("{str(aValue)}").length'))):
+                            if evaluate(self._calling_method + f' === document.getElementsByClassName("{str(aValue)}[{str(number)}]")'):
+                                correct_number = number
+                                calling_className = aValue
+            evaluate(self._calling_method + f'.className = "{str(value)}"', return_value=False)
+            self._className = value
+            self.calling_method = f'document.getElementsByClassName("{str(calling_className)}[{str(correct_number)}]")'
+        else:
+            evaluate(self._calling_method + f'.className = "{str(value)}"', return_value=False)
+            self._className = value
 
     @property
     def clientHeight(self):
@@ -1300,8 +1391,26 @@ class _DOMElement():
         self._previousElementSibling = value
     
 
-    def addEventListener(self, eventListener, function):
-        evaluate(self._calling_method + f'.addEventListener("{str(eventListener)}, {str(function)}")', return_value=False)
+    def addEventListener(self, eventListener, function, stopAtFirstHit=False):
+        def HelloWorld():
+            return 'Hello World'
+        if type(function) == type(HelloWorld):
+            instanceName = createRandomString(12)
+            command = 'sessionStorage.setItem("python_animenosekai_' + instanceName + '_isActivated", false);' + self._calling_method + '.addEventListener("' + eventListener + '", function(){sessionStorage.setItem("python_animenosekai_' + instanceName + '_isActivated", true);setTimeout(function(){sessionStorage.setItem("python_animenosekai_' + instanceName + '_isActivated", false);}, 110)})'
+            #print(command)
+            evaluate(command, return_value=False)
+            def checkForEvent(instanceName):
+                while True:
+                    time.sleep(0.1)
+                    if evaluate(f'sessionStorage.getItem("python_animenosekai_{str(instanceName)}_isActivated")') == 'true':
+                        function()
+                        if stopAtFirstHit:
+                            break
+            thread = threading.Thread(target=checkForEvent, args=[instanceName])
+            thread.daemon = True
+            thread.start()
+        else:
+            evaluate(self._calling_method + f'.addEventListener("{str(eventListener)}, {str(function)}")', return_value=False)
 
     def appendChild(self, DOMElement):
         evaluate(self._calling_method + f'.appendChild({DOMElement._calling_method})', return_value=False)
@@ -1396,7 +1505,7 @@ class _DOMElement():
 
     def querySelector(self, query):
         newDOMElement = _DOMElement()
-        newDOMElement._calling_method = self._calling_method + f'.querySelector("{str(query)}")'
+        newDOMElement.calling_method = self._calling_method + f'.querySelector("{str(query)}")'
         return newDOMElement
 
     def querySelectorAll(self, query):
@@ -1404,7 +1513,7 @@ class _DOMElement():
         list_of_dom = []
         for number in range(int(length)):
             newDOMElement = _DOMElement()
-            newDOMElement._calling_method = self._calling_method + f'.querySelectorAll("{query}")[{str(number)}]'
+            newDOMElement.calling_method = self._calling_method + f'.querySelectorAll("{query}")[{str(number)}]'
             list_of_dom.append(newDOMElement)
         return list_of_dom
 
@@ -1631,8 +1740,10 @@ class _Document():
         newDOMElement = _DOMElement()
         newDOMElement.calling_method = 'document.pointerLockElement'
         self._pointerLockElement = newDOMElement
-        self._styleSheets = evaluate('document.styleSheets')
-
+        try:
+            self._styleSheets = evaluate('document.styleSheets')
+        except:
+            pass
 
 
     def getElementById(self, id):
@@ -1649,58 +1760,367 @@ class _Document():
         According to MDN\n
         Returns a list of elements with the given class name.
         """
-        newDOMElement = _DOMElement()
-        newDOMElement.calling_method = f'document.getElementsByClassName("{str(className)}")'
-        return newDOMElement
+        list_of_elements = []
+        for number in range(int(evaluate(f'document.getElementsByClassName("{str(className)}").length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.getElementsByClassName("{str(className)}")[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        return list_of_elements
     
     def getElementsByName(self, name):
         """
         According to MDN\n
         Returns a list of elements with the given name.
         """
-        newDOMElement = _DOMElement()
-        newDOMElement.calling_method = f'document.getElementsByName("{str(name)}")'
-        return newDOMElement
+        list_of_elements = []
+        for number in range(int(evaluate(f'document.getElementsByName("{str(name)}").length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.getElementsByName("{str(name)}")[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        return list_of_elements
     
     def getElementsByTagName(self, tagName):
         """
         According to MDN\n
         Returns a list of elements with the given tag name.
         """
-        newDOMElement = _DOMElement()
-        newDOMElement.calling_method = f'document.getElementsByTagName("{str(tagName)}")'
-        return newDOMElement
+        list_of_elements = []
+        for number in range(int(evaluate(f'document.getElementsByTagName("{str(tagName)}").length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.getElementsByTagName("{str(tagName)}")[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        return list_of_elements
     
     def getElementsByTagNameNS(self, tagName):
         """
         According to MDN\n
         Returns a list of elements with the given tag name and namespace.
         """
-        newDOMElement = _DOMElement()
-        newDOMElement.calling_method = f'document.getElementsByTagNameNS("{str(tagName)}")'
-        return newDOMElement
+        list_of_elements = []
+        for number in range(int(evaluate(f'document.getElementsByTagNameNS("{str(tagName)}").length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.getElementsByTagNameNS("{str(tagName)}")[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        return list_of_elements
 
-    def createElement(self, type):
+    def createElement(self, tagName):
         """
         According to MDN\n
         Creates a new element with the given tag name.
         """
         variable_name = str(createRandomString(12))
-        evaluate(f'document.getElementsByTagName("html")[0].insertAdjacentHTML("beforeend", "<{type} id=\\"python_animenosekai_{variable_name}\\"></{type}>")', return_value=False)
+        evaluate(f'document.getElementsByTagName("html")[0].insertAdjacentHTML("beforeend", "<{tagName} id=\\"python_animenosekai_{variable_name}\\"></{tagName}>")', return_value=False)
         newDOMElement = _DOMElement()
         newDOMElement.calling_method = f'document.getElementById("python_animenosekai_{variable_name}")'
         return newDOMElement
 
 
 ######### LESS COMMON METHODS
-    def adoptNode(self):
+    def adoptNode(self, element):
         """
         According to MDN\n
         Document.adoptNode() transfers a node from another document into the method's document.\n
         The adopted node and its subtree is removed from its original document (if any), and its ownerDocument is changed to the current document.\n
         The node can then be inserted into the current document.
         """
-        evaluate()
+        return evaluate(f'document.adoptNode({str(element.calling_method)})')
+
+    def createAttribute(self, name):
+        """
+        According to MDN\n
+        The Document.createAttribute() method creates a new attribute node, and returns it.\n
+        The object created a node implementing the Attr interface.\n
+        The DOM does not enforce what sort of attributes can be added to a particular element in this manner.
+        """
+        attributeElementDOM = self.createElement(f'python_animenosekai_attributeelement_{str(name.replace(" ", ""))}')
+        attributeElementDOM.setAttribute(name, '')
+        newAttributeElement = _Attribute()
+        newAttributeElement.calling_method = attributeElementDOM.getAttributeNode(name)
+        return newAttributeElement
+
+    def createCDATASection(self, data):
+        """
+        According to MDN\n
+        createCDATASection() creates a new CDATA section node, and returns it.
+        """
+        return evaluate(f'document.createCDATASection("{str(data)}")')
+
+    def createComment(self, value):
+        """
+        According to MDN\n
+        createComment() creates a new comment node, and returns it.
+        """
+        return evaluate(f'document.createComment("{str(value)}")')
+
+    def createDocumentFragment(self):
+        """
+        According to MDN\n
+        Creates a new empty DocumentFragment into which DOM nodes can be added to build an offscreen DOM tree.
+        """
+        newDocumentFragmentElement = _DocumentFragment()
+        return evaluate('document.createDocumentFragment()')
+
+    def createElementNS(self, tagName, namespaceURI):
+        """
+        According to MDN\n
+        Creates an element with the specified namespace URI and qualified name.\n
+        
+        To create an element without specifying a namespace URI, use the createElement() method.
+        """
+        return evaluate(f'document.createElementNS("{str(namespaceURI)}", "{str(tagName)}")')
+
+    def createNodeIterator(self, rootDOMElement, whatToShow=-1):
+        """
+        According to MDN\n
+        Returns a new NodeIterator object.
+        """
+        return evaluate(f'document.createNodeIterator({str(rootDOMElement.calling_method)}, {str(whatToShow)})')
+
+    def createProcessingInstruction(self, target, data):
+        """
+        According to MDN\n
+        createProcessingInstruction() generates a new processing instruction node and returns it.\n
+
+        The new node usually will be inserted into an XML document in order to accomplish anything with it, such as with node.insertBefore.
+        """
+        return evaluate(f'document.createProcessingInstruction("{str(target)}", "{str(data)}")')
+
+    def createRange(self):
+        """
+        According to MDN\n
+        The Document.createRange() method returns a new Range object.
+        """
+        return evaluate('document.createRange()')
+
+    def createTextNode(self, content):
+        """
+        According to MDN\n
+        Creates a new Text node. This method can be used to escape HTML characters.
+        """
+        return evaluate(f'document.createTextNode("{str(content)}")')
+
+    def createTreeWalker(self, rootDOMElement, whatToShow=-1):
+        """
+        According to MDN\n
+        The Document.createTreeWalker() creator method returns a newly created TreeWalker object.
+        """
+        return evaluate(f'document.createTreeWalker({str(rootDOMElement.calling_method)}, {str(whatToShow)})')
+
+    def enableStyleSheetsForSet(self, name):
+        """
+        According to MDN\n
+        Enables the style sheets matching the specified name in the current style sheet set, and disables all other style sheets (except those without a title, which are always enabled).
+        """
+        evaluate(f'document.enableStyleSheetsForSet("{str(name)}")', return_value=False)
+
+    def exitPointerLock(self):
+        """
+        According to MDN\n
+        The exitPointerLock() method asynchronously releases a pointer lock previously requested through Element.requestPointerLock.\n
+
+        To track the success or failure of the request, it is necessary to listen for the pointerlockchange and pointerlockerror events.
+        """
+        evaluate('document.exitPointerLock()', return_value=False)
+
+    def getAnimations(self):
+        """
+        According to MDN\n
+        The getAnimations() method of the Document interface returns an array of all Animation objects currently in effect whose target elements are descendants of the document.\n
+        This array includes CSS Animations, CSS Transitions, and Web Animations.
+        """
+        return evaluate('document.getAnimations()')
+
+    def hasStorageAccess(self):
+        """
+        According to MDN\n
+        The hasStorageAccess() method of the Document interface returns a Promise that resolves with a boolean value indicating whether the document has access to its first-party storage.
+        """
+        return evaluate('document.hasStorageAccess()')
+
+    def importNode(self, DOMElement):
+        """
+        According to MDN\n
+        The Document object's importNode() method creates a copy of a Node or DocumentFragment from another document, to be inserted into the current document later.\n
+
+        The imported node is not yet included in the document tree.\n
+        To include it, you need to call an insertion method such as appendChild() or insertBefore() with a node that is currently in the document tree.\n
+
+        Unlike document.adoptNode(), the original node is not removed from its original document.\n
+        The imported node is a clone of the original.
+        """
+        return evaluate(f'document.importNode({str(DOMElement.calling_method)})')
+
+    def releaseCapture(self):
+        """
+        According to MDN\n
+        The releaseCapture() method releases mouse capture if it's currently enabled on an element within this document.\n
+        Enabling mouse capture on an element is done by calling element.setCapture().
+        """
+        evaluate('document.releaseCapture()', return_value=False)
+
+    def requestStorageAccess(self):
+        """
+        According to MDN\n
+        The requestStorageAccess() method of the Document interface returns a Promise that resolves if the access to first-party storage was granted, and rejects if access was denied.
+        """
+        return evaluate('document.requestStorageAccess()')
+
+    def querySelector(self, query):
+        """
+        According to MDN\n
+        The Document method querySelector() returns the first Element within the document that matches the specified selector, or group of selectors.\n
+        If no matches are found, null is returned.
+        """
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = f'document.querySelector("{str(query)}")'
+        return newDOMElement
+
+    def querySelectorAll(self, query):
+        """
+        According to MDN\n
+        The Document method querySelectorAll() returns a static (not live) NodeList representing a list of the document's elements that match the specified group of selectors.
+        """
+        length = evaluate(f'document.querySelectorAll("{query}").length')
+        list_of_dom = []
+        for number in range(int(length)):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.querySelectorAll("{query}")[{str(number)}]'
+            list_of_dom.append(newDOMElement)
+        return list_of_dom
+
+    def createExpression(self, xpathText, namespaceURLMapper):
+        """
+        According to MDN\n
+        This method compiles an XPathExpression which can then be used for (repeated) evaluations.
+        """
+        return evaluate(f'document.createExpression("{str(xpathText)}", {str(namespaceURLMapper)})')
+
+    def createNSResolver(self, DOMElement):
+        """
+        According to MDN\n
+        Creates an XPathNSResolver which resolves namespaces with respect to the definitions in scope for a specified node.
+        """
+        return evaluate(f'document.createNSResolver({str(DOMElement.calling_method)})')
+
+    def evaluate(self, xpathExpression, contextNode, namespaceResolver, resultType, result):
+        """
+        According to MDN\n
+        Returns an XPathResult based on an XPath expression and other given parameters.
+        """
+        return evaluate(f'document.evaluate("{str(xpathExpression)}", {str(contextNode.calling_method)}, {str(namespaceResolver)}, {str(resultType)}, {str(result)})')
+
+    def clear(self):
+        """
+        According to MDN\n
+        The Document.clear() method clears the whole specified document in early (pre-1.0) versions of Mozilla.\n
+
+        In recent versions of Mozilla-based applications, as well as in Internet Explorer and Netscape 4, this method does nothing.
+        """
+        evaluate('document.clear()', return_value=False)
+
+    def close(self):
+        """
+        According to MDN\n
+        The Document.close() method finishes writing to a document, opened with Document.open().
+        """
+        evaluate('document.close()', return_value=False)
+
+    def hasFocus(self):
+        """
+        According to MDN\n
+        The hasFocus() method of the Document interface returns a Boolean value indicating whether the document or any element inside the document has focus.\n
+        This method can be used to determine whether the active element in a document has focus.
+        """
+        return evaluate('document.hasFocus()')
+
+    def open(self):
+        """
+        According to MDN\n
+        The Document.open() method opens a document for writing.\n
+
+        This does come with some side effects. For example:\n
+
+        ・All event listeners currently registered on the document, nodes inside the document, or the document's window are removed.
+        ・All existing nodes are removed from the document.
+        """
+        return evaluate('document.open()')
+
+    def queryCommandEnabled(self, command):
+        """
+        According to MDN\n
+        The Document.queryCommandEnabled() method reports whether or not the specified editor command is enabled by the browser.
+        """
+        return evaluate(f'document.queryCommandEnabled({str(command)})')
+
+    def execCommand(aCommandName, aShowDefaultUI, aValueArgument):
+        """
+        According to MDN\n
+        When an HTML document has been switched to designMode, its document object exposes an execCommand method to run commands that manipulate the current editable region, such as form inputs or contentEditable elements.\n
+
+        Most commands affect the document's selection (bold, italics, etc.), while others insert new elements (adding a link), or affect an entire line (indenting).\n
+        When using contentEditable, execCommand() affects the currently active editable element.
+        """
+        return evaluate(f'document.execCommand("{str(aCommandName)}", {str(aShowDefaultUI).lower()}, "{str(aValueArgument)}")')
+
+    def queryCommandState(self, command):
+        """
+        According to MDN\n
+        The queryCommandState() method will tell you if the current selection has a certain Document.execCommand() command applied.
+        """
+        return evaluate(f'document.queryCommandState({str(command)})')
+
+    def write(self, markup):
+        """
+        According to MDN\n
+        The Document.write() method writes a string of text to a document stream opened by document.open().
+        """
+        evaluate(f'document.write({str(markup)})', return_value=False)
+
+    def writeln(self, line):
+        """
+        According to MDN\n
+        Writes a string of text followed by a newline character to a document.
+        """
+        evaluate(f'document.writeln({str(line)})', return_value=False)
+
+    def getSelection(self):
+        """
+        According to MDN\n
+        The getSelection() property of the DocumentOrShadowRoot interface returns a Selection object representing the range of text selected by the user, or the current position of the caret.
+        """
+        return evaluate('document.getSelection()')
+
+    def elementFromPoint(self, x, y):
+        """
+        According to MDN\n
+        The elementFromPoint() method—available on both the Document and ShadowRoot objects—returns the topmost Element at the specified coordinates (relative to the viewport).\n
+
+        If the element at the specified point belongs to another document (for example, the document of an <iframe>), that document's parent element is returned (the <iframe> itself).\n
+        If the element at the given point is anonymous or XBL generated content, such as a textbox's scroll bars, then the first non-anonymous ancestor element (for example, the textbox) is returned.\n
+
+        Elements with pointer-events set to none will be ignored, and the element below it will be returned.\n
+
+        If the method is run on another document (like an <iframe>'s subdocument), the coordinates are relative to the document where the method is being called.\n
+
+        If the specified point is outside the visible bounds of the document or either coordinate is negative, the result is null.
+        """
+        newDOMElement = _DOMElement()
+        newDOMElement.calling_method = f'document.elementFromPoint({str(x)}, {str(y)})'
+        return newDOMElement
+
+    def elementsFromPoint(self, x, y):
+        """
+        According to MDN\n
+        The elementsFromPoint() method of the DocumentOrShadowRoot interface returns an array of all elements at the specified coordinates (relative to the viewport).
+
+        It operates in a similar way to the elementFromPoint() method.
+        """
+        list_of_elements = []
+        for number in range(int(evaluate(f'document.elementsFromPoint({str(x)}, {str(y)}).length'))):
+            newDOMElement = _DOMElement()
+            newDOMElement.calling_method = f'document.elementsFromPoint({str(x)}, {str(y)})[{str(number)}]'
+            list_of_elements.append(newDOMElement)
+        return list_of_elements
 
 
 ########### PROPERTIES
@@ -2046,6 +2466,9 @@ class _Document():
         evaluate(f'document.title = "{value}"', return_value=False)
 
 
+
+
+####### GLOBAL METHODS
 def setTimeout(function, milliseconds):
     """
     According to w3schools\n
@@ -2080,7 +2503,7 @@ def clearInterval(intervalID):
 
 
 
-
+######## window Element Class
 class _Window():
     """
     According to MDN\n
@@ -2173,7 +2596,7 @@ class _Window():
         The Window interface's open() method loads the specified resource into the new or existing browsing context (window, <iframe> or tab) with the specified name.\n
         If the name doesn't exist, then a new browsing context is opened in a new tab or a new window, and the specified resource is loaded into it.
         """
-        return evaluate(f'window.open("{str(URL)}", "{str(windowName)}", "{str(windowFeatures)}")', return_value=False)
+        evaluate(f'window.open("{str(URL)}", "{str(windowName)}", "{str(windowFeatures)}")', return_value=False)
     
     def moveTo(self, x, y):
         """
@@ -2252,3 +2675,6 @@ class _Window():
         The clearInterval() method stops the executions of the function specified in the setInterval() method.
         """
         evaluate(f'clearInterval({str(intervalID)})', return_value=False)
+
+
+informations.set_classes_status(True)

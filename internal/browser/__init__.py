@@ -6,7 +6,6 @@ Browser Element.
 import psutil
 
 from .launch import start
-from .informations import connected, set_connection_status, drivername
 from .config import browsername, layer
 
 browser = start()
@@ -15,8 +14,9 @@ def kill():
     """
     Kills the browser process in use.
     """
+    from .informations import connected, set_connection_status, drivername
     if layer == 'Selenium':
-        if connected or not connected:
+        if connected:
             if browsername == 'Chrome' or browsername == 'Firefox':
                 driver_process = psutil.Process(browser.service.process.pid)
                 if driver_process.is_running():
