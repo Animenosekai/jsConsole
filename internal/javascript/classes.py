@@ -1392,6 +1392,13 @@ class _DOMElement():
     
 
     def addEventListener(self, eventListener, function, stopAtFirstHit=False):
+        """
+        According to MDN\n
+        The EventTarget method addEventListener() sets up a function that will be called whenever the specified event is delivered to the target.\n
+        Common targets are Element, Document, and Window, but the target may be any object that supports events (such as XMLHttpRequest).
+
+        addEventListener() works by adding a function or an object that implements EventListener to the list of event listeners for the specified event type on the EventTarget on which it's called.
+        """
         def HelloWorld():
             return 'Hello World'
         if type(function) == type(HelloWorld):
@@ -1413,102 +1420,231 @@ class _DOMElement():
             evaluate(self._calling_method + f'.addEventListener("{str(eventListener)}, {str(function)}")', return_value=False)
 
     def appendChild(self, DOMElement):
+        """
+        According to MDN\n
+        The Node.appendChild() method adds a node to the end of the list of children of a specified parent node.\n
+        If the given child is a reference to an existing node in the document, appendChild() moves it from its current position to the new position (there is no requirement to remove the node from its parent node before appending it to some other node).\n
+
+        This means that a node can't be in two points of the document simultaneously.\n
+        So if the node already has a parent, the node is first removed, then appended at the new position.\n
+        The Node.cloneNode() method can be used to make a copy of the node before appending it under the new parent.\n
+        Note that the copies made with cloneNode will not be automatically kept in sync.\n
+
+        If the given child is a DocumentFragment, the entire contents of the DocumentFragment are moved into the child list of the specified parent node.
+        """
         evaluate(self._calling_method + f'.appendChild({DOMElement._calling_method})', return_value=False)
 
     def blur(self):
+        """
+        According to w3schools\n
+        Removes focus from an element.
+        """
         evaluate(self._calling_method + '.blur()', return_value=False)
     
     def click(self):
+        """
+        According to MDN\n
+        The HTMLElement.click() method simulates a mouse click on an element.\n
+
+        When click() is used with supported elements (such as an <input>), it fires the element's click event.\n
+        This event then bubbles up to elements higher in the document tree (or event chain) and fires their click events.
+        """
         evaluate(self._calling_method + '.click()', return_value=False)
     
-    def cloneNode(self):
+    def cloneNode(self, deep=False):
+        """
+        According to w3schools\n
+        Clones an element.
+        """
+        variableName = createRandomString(12)
+        documentElement = _Document()
+        newElement = documentElement.createElement(f'pythonanimenosekaielement{str(variableName)}')
+        newElement.style = 'display: none;'
+        evaluate(f'document.getElementsByTagName("pythonanimenosekaielement{str(variableName)}")[0].appendChild({self._calling_method}.cloneNode({str(deep).lower()}))')
         newDOMElement = _DOMElement()
-        newDOMElement.calling_method = self._calling_method
+        newDOMElement.calling_method = f'document.getElementsByTagName("pythonanimenoekaielement{str(variableName)}").children[0]'
         return newDOMElement
     
     def compareDocumentPosition(self, DOMElement):
+        """
+        According to w3schools\n
+        Compares the document position of two elements.
+        """
         evaluate('var element = ' + DOMElement._calling_method, return_value=False)
         return evaluate(self._calling_method + '.compareDocumentPosition(element)')
     
     def contains(self, DOMElement):
+        """
+        According to w3schools\n
+        Returns true if a node is a descendant of a node, otherwise false.
+        """
         evaluate('var element = ' + DOMElement._calling_method, return_value=False)
         return evaluate(self._calling_method + '.contains(element)')
     
     def exitFullscreen(self):
+        """
+        According to w3schools\n
+        Cancels an element in fullscreen mode.
+        """
         evaluate(self._calling_method + '.exitFullscreen()', return_value=False)
     
     def focus(self):
+        """
+        According to w3schools\n
+        Gives focus to an element.
+        """
         evaluate(self._calling_method + '.focus()', return_value=False)
     
     def getAttribute(self, attributeName):
+        """
+        According to w3schools\n
+        Returns the specified attribute value of an element node.
+        """
         return evaluate(self._calling_method + f'.getAttribute("{str(attribute)}")')
     
     def getAttributeNode(self, attributeName):
+        """
+        According to w3schools\n
+        Returns the specified attribute node.
+        """
         newAttributeElement = _Attribute()
         newAttributeElement.calling_method = self._calling_method + f'.getAttributeNode("{str(attribute)}")'
         return newAttributeElement
     
     def getBoundingClientRect(self):
+        """
+        According to w3schools\n
+        Returns the size of an element and its position relative to the viewport.
+        """
         return evaluate(self._calling_method + '.getBoundingClientRect()')
 
     def getElementsByClassName(self, className):
+        """
+        According to w3schools\n
+        Returns a collection of all child elements with the specified class name.
+        """
         length = evaluate(self._calling_method + f'.getElementsByClassName({className}).length')
         list_of_dom = []
         for number in range(int(length)):
             newDOMElement = _DOMElement()
-            newDOMElement._calling_method = self._calling_method + f'.getElementsByClassName({className})[{str(number)}]'
+            newDOMElement.calling_method = self._calling_method + f'.getElementsByClassName({className})[{str(number)}]'
             list_of_dom.append(newDOMElement)
         return list_of_dom
 
     def getElementsByTagName(self, className):
+        """
+        According to w3schools\n
+        Returns a collection of all child elements with the specified tag name.
+        """
         length = evaluate(self._calling_method + f'.getElementsByTagName({className}).length')
         list_of_dom = []
         for number in range(int(length)):
             newDOMElement = _DOMElement()
-            newDOMElement._calling_method = self._calling_method + f'.getElementsByTagName({className})[{str(number)}]'
+            newDOMElement.calling_method = self._calling_method + f'.getElementsByTagName({className})[{str(number)}]'
             list_of_dom.append(newDOMElement)
         return list_of_dom
 
     def hasAttribute(self, attribute):
+        """
+        According to w3schools\n
+        Returns true if an element has the specified attribute, otherwise false.
+        """
         return evaluate(self._calling_method + f'.hasAttribute("{str(attribute)}")')
     
     def hasAttributes(self, attributes):
+        """
+        According to w3schools\n
+        Returns true if an element has any attributes, otherwise false.
+        """
         return evaluate(self._calling_method + f'.hasAttributes("{str(attributes)}")')
     
     def hasChildNodes(self):
+        """
+        According to w3schools\n
+        Returns true if an element has any child nodes, otherwise false.
+        """
         return evaluate(self._calling_method + '.hasChildNodes()')
     
     def insertAdjacentElement(self, position, DOMElement):
+        """
+        According to w3schools\n
+        Inserts a HTML element at the specified position relative to the current element.
+        """
         evaluate(self._calling_method + f'.insertAdjacentElement("{str(position)}","{str(DOMElement._calling_method)}")', return_value=False)
     
     def insertAdjacentHTML(self, position, html):
+        """
+        According to w3schools\n
+        Inserts a HTML formatted text at the specified position relative to the current element.
+        """
         evaluate(self._calling_method + f'.insertAdjacentHTML("{str(position)}","{str(html)}")', return_value=False)
     
     def insertAdjacentText(self, position, text):
+        """
+        According to w3schools\n
+        Inserts text into the specified position relative to the current element.
+        """
         evaluate(self._calling_method + f'.insertAdjacentText("{str(position)}","{str(text)}")', return_value=False)
     
     def insertBefore(self, newDOMElement, positionDOMElement):
+        """
+        According to w3schools\n
+        Inserts a new child node before a specified, existing, child node.
+        """
         evaluate(self._calling_method + f'.insertAdjacentText("{str(newDOMElement._calling_method)}","{str(positionDOMElement._calling_method)}")', return_value=False)
+
+    def isDefaultNamespace(self, namespaceURI):
+        """
+        According to w3schools\n
+        Returns true if a specified namespaceURI is the default, otherwise false
+        """
+        return evaluate(self._calling_method + f'.isDefaultNamespace("{str(namespaceURI)}")')
     
     def isEqualNode(self, DOMElement):
-        evaluate(self._calling_method + f'.isEqualNode("{str(DOMElement._calling_method)}")')
+        """
+        According to w3schools\n
+        Checks if two elements are equal.
+        """
+        return evaluate(self._calling_method + f'.isEqualNode("{str(DOMElement._calling_method)}")')
         
     def isSameNode(self, DOMElement):
+        """
+        According to w3schools\n
+        Checks if two elements are the same node.
+        """
         if DOMElement.calling_method == self._calling_method:
             return True
+        else:
+            return evaluate(self._calling_method + f'.isSameNode({str(DOMElement.calling_method)})')
         
     def isSupported(self, feature, version):
+        """
+        According to w3schools\n
+        Returns true if a specified feature is supported on the element.
+        """
         return evaluate(self._calling_method + f'.isSupported("{str(feature)}","{str(version)}")')
     
     def normalize(self):
+        """
+        According to w3schools\n
+        Joins adjacent text nodes and removes empty text nodes in an element.
+        """
         evaluate(self._calling_method + '.normalize()')
 
     def querySelector(self, query):
+        """
+        According to w3schools\n
+        Returns the first child element that matches a specified CSS selector(s) of an element.
+        """
         newDOMElement = _DOMElement()
         newDOMElement.calling_method = self._calling_method + f'.querySelector("{str(query)}")'
         return newDOMElement
 
     def querySelectorAll(self, query):
+        """
+        According to w3schools\n
+        Returns all child elements that matches a specified CSS selector(s) of an element.
+        """
         length = evaluate(self._calling_method + f'.querySelectorAll("{query}").length')
         list_of_dom = []
         for number in range(int(length)):
@@ -1518,33 +1654,88 @@ class _DOMElement():
         return list_of_dom
 
     def remove(self):
+        """
+        According to w3schools\n
+        Removes the element from the DOM.
+
+        > You won't be able to keep the DOMElement object after calling this function.
+        """
         evaluate(self._calling_method + '.remove()', return_value=False)
     
     def removeAttribute(self, attributeName):
+        """
+        According to w3schools\n
+        Removes a specified attribute from an element.
+        """
         evaluate(self._calling_method + f'.removeAttribute("{str(attributeName)}")', return_value=False)
+
+    def removeAttributeNode(self, attributeNode):
+        """
+        According to w3schools\n
+        Removes a specified attribute node, and returns the removed node.
+        
+        > You won't be able to keep the attribute object after calling this function.
+        """
+        evaluate(self._calling_method + f'.removeAttribute("{str(attributeNode.calling_method)}")', return_value=False)
+        return attributeNode
     
     def removeChild(self, DOMElement):
+        """
+        According to w3schools\n
+        Removes a child node from an element.
+        """
         evaluate(self._calling_method + f'.removeChild("{str(DOMElement._calling_method)}")', return_value=False)
     
     def removeEventListener(self, eventListener):
+        """
+        According to w3schools\n
+        Removes an event handler that has been attached with the addEventListener() method.
+        """
         evaluate(self._calling_method + f'.removeEventListener("{str(eventListener)}")', return_value=False)
     
     def replaceChild(self, DOMElement, DOMElementToReplace):
+        """
+        According to w3schools\n
+        Replaces a child node in an element.
+        """
         evaluate(self._calling_method + f'.replaceChild("{str(DOMElement._calling_method)}", "{str(DOMElementToReplace._calling_method)}")', return_value=False)
     
     def requestFullscreen(self):
+        """
+        According to w3schools\n
+        Shows an element in fullscreen mode.
+        """
         evaluate(self._calling_method + '.requestFullscreen()', return_value=False)
     
     def scrollIntoView(self, alignTo=False):
+        """
+        According to w3schools\n
+        Scrolls the specified element into the visible area of the browser window.
+        """
         if alignTo:
             evaluate(self._calling_method + '.scrollIntoView(alignTo=true)', return_value=False)
         else:
             evaluate(self._calling_method + '.scrollIntoView()', return_value=False)
 
     def setAttribute(self, attributeName, attributeValue):
+        """
+        According to w3schools\n
+        Sets or changes the specified attribute, to the specified value.
+        """
         evaluate(self._calling_method + f'.setAttribute("{str(attributeName)}", "{str(attributeValue)}")', return_value=False)
+
+    def setAttributeNode(self, attributeNode):
+        """
+        According to w3schools\n
+        Sets or changes the specified attribute node.
+        """
+        evaluate(self._calling_method + f'.setAttributeNode({str(attributeNode.calling_method)})')
     
     def toString(self):
+        """
+        According to w3schools\n
+        Converts an element to a string.
+        """
         return evaluate(self._calling_method + '.toString()')
     
     

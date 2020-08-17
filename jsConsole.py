@@ -57,7 +57,7 @@ def clearTimeout(timeoutID):
     JSClass.clearTimeout(timeoutID)
 
 def evaluate(code_to_execute, return_value=False):
-    JSClass.evaluate(code_to_execute, return_value=return_value)
+    return JSClass.evaluate(code_to_execute, return_value=return_value)
 
 def setInterval(function, milliseconds):
     JSClass.setInterval(function, milliseconds)
