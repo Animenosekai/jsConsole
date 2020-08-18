@@ -18,21 +18,24 @@ async def _launchpyppeteer():
     try:
         browser = await launch()
     except:
+        pyppeteer_args = args
+        if no_sandbox:
+            pyppeteer_args.append('--no-sandbox')
         if executable_path == '':
             browser = await launch(
                 handleSIGINT=False,
                 handleSIGTERM=False,
                 handleSIGHUP=False,
-                headless=True,
-                args=['--no-sandbox']
+                headless=headless,
+                args=pyppeteer_args
             )
         else:
             browser = await launch(
                 handleSIGINT=False,
                 handleSIGTERM=False,
                 handleSIGHUP=False,
-                headless=True,
-                args=['--no-sandbox'],
+                headless=headless,
+                args=pyppeteer_args,
                 executablePath=executable_path
             )
     page = await browser.newPage()

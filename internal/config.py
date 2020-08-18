@@ -9,9 +9,9 @@ layer = 'Pyppeteer'
 
 ##### Works for both layers
 executable_path = ''
+no_sandbox = False
+args = []
 
 ####### Only for Selenium
-browsername = 'PhantomJS'
-no_sandbox = False
 headless = False
-args = []
+browsername = 'Chrome'
