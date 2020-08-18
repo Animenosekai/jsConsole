@@ -11,6 +11,8 @@ if not informations.areClassesInitialized:
     from .execute_js import evaluate
     from .. import browser
 from ..exceptions import *
+from ..browser import _BrowserObject
+BrowserObject = _BrowserObject
 
 #import lifeeasy
 
@@ -20,6 +22,8 @@ import time
 import random
 import string
 list_of_variables = []
+dict_of_ids = {}
+ids_to_thread = {}
 
 def createRandomString(length):
     """
@@ -31,7 +35,25 @@ def createRandomString(length):
     result_str = ''.join(random.choice(letters) for i in range(length))
     if result_str in list_of_variables:
         result_str = createRandomString(length)
+    list_of_variables.append(result_str)
+    BrowserObject.list_of_variables.append(result_str)
     return result_str
+
+def createRandomIntID(length):
+    """
+    Creates a random number.\n
+    Useful for identifiers.
+    """
+    global dict_of_ids
+    final_id = ''
+    for _ in range(length):
+        final_id += str(random.randint(0,10))
+    if int(final_id) in dict_of_ids:
+        final_id = createRandomIntID(length)
+    dict_of_ids[int(final_id)] = True
+    BrowserObject.dict_of_ids[int(final_id)] = True
+    return int(final_id)
+
 
 class _Math():
     '''
@@ -541,10 +563,17 @@ class _Screen():
 
     class _ScreenOrientation():
         def __init__(self):
-            self.angle = evaluate('screen.orientation.angle')
-            self.onchange = evaluate('screen.orientation.onchange')
-            self.type = evaluate('screen.orientation.type')
-
+            try:
+                self.angle = evaluate('screen.orientation.angle')
+                self.onchange = evaluate('screen.orientation.onchange')
+                self.type = evaluate('screen.orientation.type')
+            except:
+                def angle(self):
+                    return evaluate('screen.orientation.angle')
+                def onchange(self):
+                    return evaluate('screen.orientation.onchange')
+                def type(self):
+                    return evaluate('screen.orientation.type')
     width = evaluate('screen.width')
     height = evaluate('screen.height')
     availWidth = evaluate('screen.availWidth')
@@ -646,11 +675,23 @@ class _Navigator():
         The NetworkInformation interfaces cannot be instantiated.\n
         It is instead accessed through the connection property of the Navigator interface.
         """
-        downlink = evaluate('navigator.connection.downlink')
-        effectiveType = evaluate('navigator.connection.effectiveType')
-        onchange = evaluate('navigator.connection.onchange')
-        rtt = evaluate('navigator.connection.rtt')
-        saveData = evaluate('navigator.connection.saveData')
+        try:
+            downlink = evaluate('navigator.connection.downlink')
+            effectiveType = evaluate('navigator.connection.effectiveType')
+            onchange = evaluate('navigator.connection.onchange')
+            rtt = evaluate('navigator.connection.rtt')
+            saveData = evaluate('navigator.connection.saveData')
+        except:
+            def downlink(self):
+                return evaluate('navigator.connection.downlink')
+            def effectiveType(self):
+                return evaluate('navigator.connection.effectiveType')
+            def onchange(self):
+                return evaluate('navigator.connection.onchange')
+            def rtt(self):
+                return evaluate('navigator.connection.rtt')
+            def saveData(self):
+                return evaluate('navigator.connection.saveData')
 
     class _MediaSession():
         """
@@ -719,8 +760,11 @@ class _Navigator():
             self.mimeTypes.append(newMimeElement)
         
         self.languages = []
-        for number in range(int(evaluate('navigator.languages.length'))):
-            self.languages.append(evaluate(f'navigator.languages[{str(number)}]'))
+        try:
+            for number in range(int(evaluate('navigator.languages.length'))):
+                    self.languages.append(evaluate(f'navigator.languages[{str(number)}]'))
+        except:
+            pass
 
     cookieEnabled = evaluate('navigator.cookieEnabled')
     appName = evaluate('navigator.appName')
@@ -1391,7 +1435,7 @@ class _DOMElement():
         self._previousElementSibling = value
     
 
-    def addEventListener(self, eventListener, function, stopAtFirstHit=False):
+    def addEventListener(self, eventListener, function, stopAtFirstHit=False, stopAtHitNumber=-1):
         """
         According to MDN\n
         The EventTarget method addEventListener() sets up a function that will be called whenever the specified event is delivered to the target.\n
@@ -1407,11 +1451,29 @@ class _DOMElement():
             #print(command)
             evaluate(command, return_value=False)
             def checkForEvent(instanceName):
-                while True:
-                    time.sleep(0.1)
-                    if evaluate(f'sessionStorage.getItem("python_animenosekai_{str(instanceName)}_isActivated")') == 'true':
-                        function()
-                        if stopAtFirstHit:
+                if stopAtHitNumber == -1:
+                    while True:
+                        time.sleep(0.1)
+                        try:
+                            if evaluate(f'sessionStorage.getItem("python_animenosekai_{str(instanceName)}_isActivated")') == 'true':
+                                function()
+                                if stopAtFirstHit:
+                                    break
+                        except:
+                            break
+                else:
+                    counter = 0
+                    while True:
+                        if counter == stopAtHitNumber:
+                            break
+                        time.sleep(0.1)
+                        try:
+                            if evaluate(f'sessionStorage.getItem("python_animenosekai_{str(instanceName)}_isActivated")') == 'true':
+                                function()
+                                counter += 1
+                                if stopAtFirstHit:
+                                    break
+                        except:
                             break
             thread = threading.Thread(target=checkForEvent, args=[instanceName])
             thread.daemon = True
@@ -1896,10 +1958,13 @@ class _Document():
         self._visibilityState = evaluate('document.visibilityState')
         self._childElementCount = evaluate('document.childElementCount')
         list_of_elements = []
-        for number in range(int(evaluate('document.children.length'))):
-            newDOMElement = _DOMElement()
-            newDOMElement.calling_method = f'document.children[{str(number)}]'
-            list_of_elements.append(newDOMElement)
+        try:
+            for number in range(int(evaluate('document.children.length'))):
+                newDOMElement = _DOMElement()
+                newDOMElement.calling_method = f'document.children[{str(number)}]'
+                list_of_elements.append(newDOMElement)
+        except:
+            pass
         self._children = list_of_elements
         newDOMElement = _DOMElement()
         newDOMElement.calling_method = 'document.firstElementChild'
@@ -2667,7 +2732,23 @@ def setTimeout(function, milliseconds):
 
     > Returns an identifier for the timeout process (called timeoutID in the arguments of clearTimeout())
     """
-    return evaluate(f'setTimeout("{str(function)}", {str(milliseconds)})')
+    def HelloWorld():
+        return 'Hello World'
+    if type(function) == type(HelloWorld):
+        intervalID = createRandomIntID(24)
+        import time
+        def runFunction(seconds):
+            time.sleep(seconds/1000)
+            if dict_of_ids[intervalID] == True:
+                function()
+        thread = threading.Thread(target=runFunction, args=[milliseconds])
+        thread.daemon = True
+        thread.start()
+        ids_to_thread[intervalID] = thread
+        BrowserObject.ids_to_thread[intervalID] = thread
+        return intervalID
+    else:
+        return evaluate(f'setTimeout("{str(function)}", {str(milliseconds)})')
 
 def setInterval(function, milliseconds):
     """
@@ -2676,21 +2757,55 @@ def setInterval(function, milliseconds):
 
     > Returns an identifier for the interval process (called intervalID in the arguments of clearInterval())
     """
-    return evaluate(f'setInterval({str(function)}, {str(milliseconds)})')
+    global ids_to_thread
+    def HelloWorld():
+        return 'Hello World'
+    if type(function) == type(HelloWorld):
+        intervalID = createRandomIntID(24)
+        import time
+        def runFunction(seconds):
+            while dict_of_ids[intervalID]:
+                time.sleep(seconds/1000)
+                if dict_of_ids[intervalID] == True:
+                    function()
+        thread = threading.Thread(target=runFunction, args=[milliseconds])
+        thread.daemon = True
+        thread.start()
+        ids_to_thread[intervalID] = thread
+        BrowserObject.ids_to_thread[intervalID] = thread
+        return intervalID
+    else:
+        return evaluate(f'setInterval({str(function)}, {str(milliseconds)})')
 
 def clearTimeout(timeoutID):
     """
     According to w3schools\n
     The clearTimeout() method stops the execution of the function specified in setTimeout().
     """
-    evaluate(f'clearTimeout({str(timeoutID)})', return_value=False)
+    if timeoutID in dict_of_ids:
+        dict_of_ids[intervalID] = False
+        BrowserObject.dict_of_ids[intervalID] = False
+        try:
+            ids_to_thread[timeoutID]._stop().set()
+        except:
+            pass
+    else:
+        evaluate(f'clearTimeout({str(timeoutID)})', return_value=False)
 
 def clearInterval(intervalID):
     """
     According to w3schools\n
     The clearInterval() method stops the executions of the function specified in the setInterval() method.
     """
-    evaluate(f'clearInterval({str(intervalID)})', return_value=False)
+    if intervalID in dict_of_ids:
+        dict_of_ids[intervalID] = False
+        BrowserObject.dict_of_ids[intervalID] = False
+        try:
+            ids_to_thread[intervalID]._stop().set()
+        except:
+            pass
+    else:
+        evaluate(f'clearInterval({str(intervalID)})', return_value=False)
 
 
 
@@ -2837,37 +2952,88 @@ class _Window():
         except:
             return False
 
-    def setTimeout(self, function, milliseconds):
+    def setTimeout(function, milliseconds):
         """
         According to w3schools\n
         Executes a function, after waiting a specified number of milliseconds.
 
         > Returns an identifier for the timeout process (called timeoutID in the arguments of clearTimeout())
         """
-        return evaluate(f'setTimeout("{str(function)}", {str(milliseconds)})')
+        def HelloWorld():
+            return 'Hello World'
+        if type(function) == type(HelloWorld):
+            intervalID = createRandomIntID(24)
+            import time
+            def runFunction(seconds):
+                time.sleep(seconds/1000)
+                if dict_of_ids[intervalID] == True:
+                    function()
+            thread = threading.Thread(target=runFunction, args=[milliseconds])
+            thread.daemon = True
+            thread.start()
+            ids_to_thread[intervalID] = thread
+            BrowserObject.ids_to_thread[intervalID] = thread
+            return intervalID
+        else:
+            return evaluate(f'setTimeout("{str(function)}", {str(milliseconds)})')
 
-    def setInterval(self, function, milliseconds):
+    def setInterval(function, milliseconds):
         """
         According to w3schools\n
         Same as setTimeout(), but repeats the execution of the function continuously.
 
         > Returns an identifier for the interval process (called intervalID in the arguments of clearInterval())
         """
-        return evaluate(f'setInterval("{str(function)}", {str(milliseconds)})')
+        global ids_to_thread
+        def HelloWorld():
+            return 'Hello World'
+        if type(function) == type(HelloWorld):
+            intervalID = createRandomIntID(24)
+            import time
+            def runFunction(seconds):
+                while dict_of_ids[intervalID]:
+                    time.sleep(seconds/1000)
+                    if dict_of_ids[intervalID] == True:
+                        function()
+            thread = threading.Thread(target=runFunction, args=[milliseconds])
+            thread.daemon = True
+            thread.start()
+            ids_to_thread[intervalID] = thread
+            BrowserObject.ids_to_thread[intervalID] = thread
+            return intervalID
+        else:
+            return evaluate(f'setInterval({str(function)}, {str(milliseconds)})')
 
-    def clearTimeout(self, timeoutID):
+    def clearTimeout(timeoutID):
         """
         According to w3schools\n
         The clearTimeout() method stops the execution of the function specified in setTimeout().
         """
-        evaluate(f'clearTimeout({str(timeoutID)})', return_value=False)
+        if timeoutID in dict_of_ids:
+            dict_of_ids[intervalID] = False
+            BrowserObject.dict_of_ids[intervalID] = False
+            try:
+                ids_to_thread[timeoutID]._stop().set()
+            except:
+                pass
+        else:
+            evaluate(f'clearTimeout({str(timeoutID)})', return_value=False)
 
-    def clearInterval(self, intervalID):
+    def clearInterval(intervalID):
         """
         According to w3schools\n
         The clearInterval() method stops the executions of the function specified in the setInterval() method.
         """
-        evaluate(f'clearInterval({str(intervalID)})', return_value=False)
+        if intervalID in dict_of_ids:
+            dict_of_ids[intervalID] = False
+            BrowserObject.dict_of_ids[intervalID] = False
+            try:
+                ids_to_thread[intervalID]._stop().set()
+            except:
+                pass
+        else:
+            evaluate(f'clearInterval({str(intervalID)})', return_value=False)
 
 
 informations.set_classes_status(True)
+BrowserObject.areClassesInitialized = True

@@ -6,7 +6,7 @@ Executing JavaScript on the browser.
 
 
 from ..browser import browser
-from ..browser import config
+from .. import config
 from ..exceptions import BrowserError
 
 import threading

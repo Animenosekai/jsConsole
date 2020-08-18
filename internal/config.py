@@ -5,13 +5,13 @@ pyJsConsole configuration file.
 """
 
 ## Choose your Browser Layer (between 'Selenium' and 'Pyppeteer')
-layer = 'Selenium'
+layer = 'Pyppeteer'
 
 ##### Works for both layers
 executable_path = ''
 
 ####### Only for Selenium
-browsername = 'Chrome'
+browsername = 'PhantomJS'
 no_sandbox = False
 headless = False
 args = []

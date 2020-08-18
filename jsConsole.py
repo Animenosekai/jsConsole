@@ -8,22 +8,19 @@ import internal.javascript.classes as JSClass
 
 console = JSClass._Console()
 document = JSClass._Document()
-history = JSClass._History
+history = JSClass._History()
 Math = JSClass._Math()
-navigator = JSClass._Navigator
+navigator = JSClass._Navigator()
 screen = JSClass._Screen()
 window = JSClass._Window()
+browser = JSClass.BrowserObject
 
 '''
 import threading
 from lifeeasy import sleep
 
 def reloadElements():
-    global console
     global document
-    global history
-    global navigator
-    global screen
     global window
     lastURL = 'data:,'
     while True:
@@ -60,7 +57,7 @@ def evaluate(code_to_execute, return_value=False):
     return JSClass.evaluate(code_to_execute, return_value=return_value)
 
 def setInterval(function, milliseconds):
-    JSClass.setInterval(function, milliseconds)
+    return JSClass.setInterval(function, milliseconds)
 
 def setTimeout(function, milliseconds):
-    JSClass.setTimeout(function, milliseconds)
+    return JSClass.setTimeout(function, milliseconds)

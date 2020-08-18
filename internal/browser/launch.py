@@ -6,7 +6,7 @@ Browser Launcher for pyJsConsole.
 import asyncio
 import threading
 
-from .config import *
+from ..config import *
 from .informations import *
 from ..exceptions import BrowserError
 
@@ -37,6 +37,8 @@ async def _launchpyppeteer():
             )
     page = await browser.newPage()
     page.setDefaultNavigationTimeout(timeout=0)
+    set_drivername('chromedriver/chromium')
+    set_connection_status(True)
     return page
 
 def _launchselenium():
@@ -58,10 +60,28 @@ def _launchselenium():
         set_connection_status(True)
     
     elif browsername.lower() == 'firefox':
-        pass
+        from selenium.webdriver.firefox.options import Options
+        options = Options()
+        if headless:
+            options.headless = True
+        if executable_path == '':
+            driver = webdriver.Firefox(options=options)
+            set_connection_status(True)
+        else:
+            driver = webdriver.Firefox(options=options, executable_path=executable_path)
+            set_connection_status(True)
+        set_drivername('geckodriver')
 
     elif browsername.lower() == 'phantom' or browsername.lower() == 'phantomjs':
-        pass
+        import warnings
+        warnings.filterwarnings('ignore')
+        if executable_path == '':
+            driver = webdriver.PhantomJS()
+            set_connection_status(True)
+        else:
+            driver = webdriver.PhantomJS(executable_path=executable_path)
+            set_connection_status(True)
+        set_drivername('ghostdriver')
 
     else:
         raise BrowserError(f'{browsername} is not supported yet.')
