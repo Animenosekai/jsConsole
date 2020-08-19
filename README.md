@@ -24,6 +24,13 @@ Just import everything from the module and you are ready to go!
 >>> document.getElementsByClassName('RNNXgb')[0].addEventListener('click', hello) ### Adding an event listener to the search bar from google.com which executes hello() when clicked.
 
 >>> window.kill() # Needed to kill the browser (for it not to stay in the background even with Python quited)
+``` 
+
+### Installation
+Install it with PyPI (`pip`) the Python Dependency/Module Manager.
+
+```bash
+pip install jsConsole
 ```
 
 ### Browser Configuration
