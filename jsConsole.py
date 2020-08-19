@@ -44,8 +44,11 @@ def newDocument():
 def newWindow():
     return JSClass._Window()
 
+def newHistory():
+    return JSClass._History()
+
 def fresh():
-    return (JSClass._Document(), JSClass._Window())
+    return (JSClass._Document(), JSClass._Window(), JSClass._History())
 
 def clearInterval(intervalID):
     JSClass.clearInterval(intervalID)
