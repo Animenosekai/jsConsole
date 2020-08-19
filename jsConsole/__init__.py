@@ -4,7 +4,7 @@ pyJsConsole wrapper.
 © Anime no Sekai - 2020
 """
 
-import internal.javascript.classes as JSClass
+from .internal.javascript import classes as JSClass
 
 console = JSClass._Console()
 document = JSClass._Document()

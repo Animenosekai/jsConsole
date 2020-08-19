@@ -15,3 +15,16 @@ args = []
 ####### Only for Selenium
 headless = True
 browsername = 'Chrome'
+
+"""
+Default Configuration is:
+
+layer = 'Selenium'
+
+executable_path = ''
+no_sandbox = False
+args = []
+
+headless = True
+browsername = 'Chrome'
+"""
